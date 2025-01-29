@@ -1,0 +1,77 @@
+import yt_dlp
+import json
+import os
+
+output_ytdlp = 'output-ytdlp'
+output_video_info = 'output-video-info'
+
+class downloadWithYtdlp:
+    if not os.path.exists(output_video_info):
+        os.mkdir(output_video_info)
+    if not os.path.exists(output_ytdlp):
+        os.mkdir(output_ytdlp)
+
+    def __init__(self, url, dataVideo = None):
+        self.url = url
+        
+        #self.infoVideo = dataVideo
+        #self.dataVideo = json.loads(dataVideo)
+
+    def listFormats(self):
+        ydl_opts = {
+            'quiet': True
+        }
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                dataVideo = ydl.extract_info(self.url, download=False)
+                dataVideoSanitize = ydl.sanitize_info(dataVideo)
+                self.title = dataVideoSanitize['title'] + '-' + dataVideoSanitize['id']
+                self.extension = dataVideoSanitize['ext']
+
+                with open(f'{output_video_info}/{self.title}.json', 'w') as file:
+                    json.dump(dataVideoSanitize, file)
+                self.file_info = f'{output_video_info}/{self.title}.json'
+                #file = open('yt_dl.json', 'w')
+                #json.dump(dataVideoSanitize, file, indent=4)
+                #file.close()
+
+                print('Data Berhasil ditulis di file')
+                return {'type': dataVideoSanitize['resolution'],'data': {'title':dataVideoSanitize['title'], 'formats': dataVideoSanitize['formats']}}
+        except Exception as e:
+            print(e)
+            return False
+
+    def downlodVideoFromReso(self, reso):
+        ydl_opts = {
+            'format': f'bv*[height<={reso}]+ba/best',
+            'outtmpl': f'{output_ytdlp}/{self.title}.{self.extension}',
+            'quiet': True,
+            'no_warnings': True
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.download_with_info_file(self.file_info)
+
+        print(f'Berhasil Mendownload file {self.title} ke {output_ytdlp}')
+
+        os.remove(self.file_info)
+
+    def downloadMusic(self):
+        ydl_opts = {
+            'format': f'ba/best',
+            'outtmpl': f'{output_ytdlp}/{self.title}.{self.extension}',
+            'quiet': True,
+            'no_warnings': True
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download_with_info_file(self.file_info)
+
+        print(f'Berhasil Mendownload file {self.title} ke {output_ytdlp}')
+
+        os.remove(self.file_info)
+        
+
+    def File(self):
+        file = f'{output_ytdlp}/{self.title}.{self.extension}'
+        return file
