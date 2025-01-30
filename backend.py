@@ -72,7 +72,8 @@ class downloadWithYtdlp:
             'format': f'ba/best',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferedformat': 'mp3'
+                'preferredcodec': 'mp3',
+                'preferredquality': '192'
             }],
             'outtmpl': f'{output_ytdlp}/{self.title}.%(ext)s',
             'quiet': True,
