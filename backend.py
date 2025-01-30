@@ -19,24 +19,29 @@ class downloadWithYtdlp:
 
     def listFormats(self):
         ydl_opts = {
-            'quiet': True
         }
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 dataVideo = ydl.extract_info(self.url, download=False)
                 dataVideoSanitize = ydl.sanitize_info(dataVideo)
                 self.title = dataVideoSanitize['title'] + '-' + dataVideoSanitize['id']
-                self.extension = dataVideoSanitize['ext']
+                type_file = 'audio' if dataVideoSanitize['resolution'] == 'audio only' else 'video'
+                self.extension = 'mp4' if type_file == 'video' else 'mp3'
+
+                try:
+                    thumbnail = dataVideoSanitize['thumbnails'][0]['url']
+                except:
+                    thumbnail = False
 
                 with open(f'{output_video_info}/{self.title}.json', 'w') as file:
-                    json.dump(dataVideoSanitize, file)
+                    json.dump(dataVideoSanitize, file, indent=4)
                 self.file_info = f'{output_video_info}/{self.title}.json'
                 #file = open('yt_dl.json', 'w')
                 #json.dump(dataVideoSanitize, file, indent=4)
                 #file.close()
 
                 print('Data Berhasil ditulis di file')
-                return {'type': dataVideoSanitize['resolution'],'data': {'title':dataVideoSanitize['title'], 'formats': dataVideoSanitize['formats']}}
+                return {'thumbnail': thumbnail, 'type': type_file,'data': {'title':dataVideoSanitize['title'], 'formats': dataVideoSanitize['formats']}}
         except Exception as e:
             print(e)
             return False
@@ -44,9 +49,7 @@ class downloadWithYtdlp:
     def downlodVideoFromReso(self, reso):
         ydl_opts = {
             'format': f'bv*[height<={reso}]+ba/best',
-            'outtmpl': f'{output_ytdlp}/{self.title}.{self.extension}',
-            'quiet': True,
-            'no_warnings': True
+            'outtmpl': f'{output_ytdlp}/{self.title}.{self.extension}'
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
