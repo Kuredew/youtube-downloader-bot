@@ -4,6 +4,7 @@ import os
 
 output_ytdlp = 'output-ytdlp'
 output_video_info = 'output-video-info'
+cookie = 'www.youtube.com_cookies.txt'
 
 class downloadWithYtdlp:
     if not os.path.exists(output_video_info):
@@ -19,6 +20,7 @@ class downloadWithYtdlp:
 
     def listFormats(self):
         ydl_opts = {
+            'cookiefile': cookie
         }
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -48,6 +50,7 @@ class downloadWithYtdlp:
 
     def downlodVideoFromReso(self, reso):
         ydl_opts = {
+            'cookiefile': cookie,
             'format': f'bv*[height<={reso}]+ba/best',
             'outtmpl': f'{output_ytdlp}/{self.title}.{self.extension}'
         }
