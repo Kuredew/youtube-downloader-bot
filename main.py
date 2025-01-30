@@ -97,9 +97,12 @@ async def main():
             await bot.edit_message(message, f'Proses selesai, mengirim file ke chat. (<code>{progress}%</code>)', parse_mode='HTML')
         
         try:
-            await bot.send_file(event.chat.username, file, caption='Selesai!', progress_callback=callback_progress)
+            try:
+                await bot.send_file(event.chat.username, file, caption='Selesai!', progress_callback=callback_progress)
+            except:
+                await bot.send_file(event.chat.username, file, caption='Selesai!', progress_callback=callback_progress, force_document=True)
             os.remove(file)
-            
+
             message = False
         except Exception as e:
             await event.respond(f'Gagal mengirim file, kesalahan : {e}')
