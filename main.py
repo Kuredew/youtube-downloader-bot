@@ -8,7 +8,7 @@ API_HASH = '1b24dd470c853bf2d5f411b7fb215644'
 BOT_TOKEN = '7582144074:AAGln6na087oFIJzytqZrhEdqatv-wm3-rI'
 BOT_TOKEN_TEST = '7229088612:AAEaAJOoJ2Mo0SfivrQq6ZjVOR34CjsRfnM'
 
-bot = TelegramClient('youtube-downloader-test', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
+bot = TelegramClient('youtube-downloader', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
 
 yt_dlp = {}
@@ -50,12 +50,27 @@ async def main():
                 os.remove(file)
         else:
             buttons = []
+
+            formats_list = []
             for formats in list_formats['data']['formats']:
-                resolusi = formats['height']
-                if resolusi == None:
+                try:
+                    height = formats['height']
+                    ext = formats['ext']
+
+                    if height < 144:
+                        continue
+
+                    if formats == None:
+                        continue
+                    
+                    if height in formats_list:
+                        continue
+
+                    formats_list.append(height)
+                except:
                     continue
 
-                buttons.append(Button.inline(f'{resolusi}p', f'{resolusi}'))
+                buttons.append([Button.inline(f'{height}p', f'{height}')])
 
             await bot.send_file(event.chat.username, list_formats['thumbnail'], caption=f'<b>Judul</b>\n{list_formats['data']['title']}\n\nPilih Resolusi :', parse_mode='HTML', buttons=buttons)
 
