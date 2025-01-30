@@ -76,9 +76,12 @@ async def main():
 
             await bot.send_file(event.chat.username, list_formats['thumbnail'], caption=f'<b>Judul</b>\n{list_formats['data']['title']}\n\nPilih Resolusi :', parse_mode='HTML', buttons=buttons)
 
+
     @bot.on(events.CallbackQuery)
     async def callback_query_handler(event):
-        global message
+        global message_id, username
+    
+        username = event.chat.username
 
         resolusi = event.data.decode('UTF-8')
         print(f'User memilih {resolusi}')
@@ -90,22 +93,24 @@ async def main():
         file = yt_dlp[event.chat.username].File()
 
         message = await event.respond('Proses selesai, mengirim file ke chat. (<code>0%</code>)', parse_mode='HTML')
+        message_id = message.id
 
         async def callback_progress(send_bytes, total):
             progress = int((send_bytes/total) * 100)
             #await event.respond('0')
-            await bot.edit_message(message, f'Proses selesai, mengirim file ke chat. (<code>{progress}%</code>)', parse_mode='HTML')
+            await bot.edit_message(username, message_id, f'Proses selesai, mengirim file ke chat. (<code>{progress}%</code>)', parse_mode='HTML')
         
         try:
             try:
-                await bot.send_file(event.chat.username, file, caption='Selesai!', progress_callback=callback_progress)
+                await bot.send_file(username, file, caption='Selesai!', progress_callback=callback_progress)
             except:
-                await bot.send_file(event.chat.username, file, caption='Selesai!', progress_callback=callback_progress, force_document=True)
+                await bot.send_file(username, file, caption='Selesai!', progress_callback=callback_progress, force_document=True)
             os.remove(file)
 
-            message = False
+            message_id = None
         except Exception as e:
             await event.respond(f'Gagal mengirim file, kesalahan : {e}')
+
 
     @bot.on(events.NewMessage(pattern='/tes-kirim'))
     async def handler(event):
