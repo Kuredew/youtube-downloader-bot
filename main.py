@@ -79,6 +79,7 @@ async def main():
     @bot.on(events.CallbackQuery)
     async def callback_query_handler(event):
         global message
+
         resolusi = event.data.decode('UTF-8')
         print(f'User memilih {resolusi}')
         await event.answer()
@@ -91,15 +92,15 @@ async def main():
         message = await event.respond('Proses selesai, mengirim file ke chat. (<code>0%</code>)', parse_mode='HTML')
 
         async def callback_progress(send_bytes, total):
-            global message
-
             progress = int((send_bytes/total) * 100)
             #await event.respond('0')
-            await message.edit(f'Proses selesai, mengirim file ke chat. (<code>{progress}%</code>)', parse_mode='HTML')
+            await bot.edit_message(message, f'Proses selesai, mengirim file ke chat. (<code>{progress}%</code>)', parse_mode='HTML')
         
         try:
             await bot.send_file(event.chat.username, file, caption='Selesai!', progress_callback=callback_progress)
             os.remove(file)
+            
+            message = False
         except Exception as e:
             await event.respond(f'Gagal mengirim file, kesalahan : {e}')
 

@@ -5,7 +5,7 @@ import subprocess
 
 output_ytdlp = 'output-ytdlp'
 output_video_info = 'output-video-info'
-cookie = 'www.youtube.com_cookies.txt'
+cookie = 'cookies.txt'
 
 class downloadWithYtdlp:
     if not os.path.exists(output_video_info):
