@@ -55,7 +55,9 @@ async def main():
             for formats in list_formats['data']['formats']:
                 try:
                     height = formats['height']
-                    ext = formats['ext']
+                    width = formats['width']
+
+                    resolution = f'{width}x{height}'
 
                     if height < 144:
                         continue
@@ -63,14 +65,14 @@ async def main():
                     if formats == None:
                         continue
                     
-                    if height in formats_list:
+                    if resolution in formats_list:
                         continue
 
-                    formats_list.append(height)
+                    formats_list.append(resolution)
                 except:
                     continue
 
-                buttons.append([Button.inline(f'{height}p', f'{height}')])
+                buttons.append([Button.inline(f'{height}p ({resolution})', f'{height}')])
 
             await bot.send_file(event.chat.username, list_formats['thumbnail'], caption=f'<b>Judul</b>\n{list_formats['data']['title']}\n\nPilih Resolusi :', parse_mode='HTML', buttons=buttons)
 
@@ -95,8 +97,11 @@ async def main():
             #await event.respond('0')
             await message.edit(f'Proses selesai, mengirim file ke chat. (<code>{progress}%</code>)', parse_mode='HTML')
         
-        await bot.send_file(event.chat.username, file, caption='Selesai!', progress_callback=callback_progress)
-        os.remove(file)
+        try:
+            await bot.send_file(event.chat.username, file, caption='Selesai!', progress_callback=callback_progress)
+            os.remove(file)
+        except Exception as e:
+            await event.respond(f'Gagal mengirim file, kesalahan : {e}')
 
     @bot.on(events.NewMessage(pattern='/tes-kirim'))
     async def handler(event):

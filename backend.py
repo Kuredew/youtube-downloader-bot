@@ -52,7 +52,12 @@ class downloadWithYtdlp:
         ydl_opts = {
             'cookiefile': cookie,
             'format': f'bv*[height<={reso}]+ba/best',
-            'outtmpl': f'{output_ytdlp}/{self.title}.{self.extension}'
+            'merge_output_format': 'mkv',
+            'postprocessors': [{
+                'key': 'FFmpegVideoConvertor',
+                'preferedformat': 'mp4'
+            }],
+            'outtmpl': f'{output_ytdlp}/{self.title}.%(ext)s',
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -65,7 +70,11 @@ class downloadWithYtdlp:
     def downloadMusic(self):
         ydl_opts = {
             'format': f'ba/best',
-            'outtmpl': f'{output_ytdlp}/{self.title}.{self.extension}',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferedformat': 'mp3'
+            }],
+            'outtmpl': f'{output_ytdlp}/{self.title}.%(ext)s',
             'quiet': True,
             'no_warnings': True
         }
