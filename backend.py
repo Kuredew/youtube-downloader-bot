@@ -1,6 +1,7 @@
 import yt_dlp
 import json
 import os
+import subprocess
 
 output_ytdlp = 'output-ytdlp'
 output_video_info = 'output-video-info'
@@ -52,12 +53,8 @@ class downloadWithYtdlp:
         ydl_opts = {
             'cookiefile': cookie,
             'format': f'bv*[height<={reso}]+ba/best',
-            'merge_output_format': 'mkv',
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-                'preferedformat': 'mp4'
-            }],
-            'outtmpl': f'{output_ytdlp}/{self.title}.%(ext)s',
+            'merge_output_format': 'mp4',
+            'outtmpl': f'{output_ytdlp}/{self.title}.%(ext)s'
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -70,14 +67,14 @@ class downloadWithYtdlp:
     def downloadMusic(self):
         ydl_opts = {
             'format': f'ba/best',
+            'outtmpl': f'{output_ytdlp}/{self.title}.%(ext)s',
+            'quiet': True,
+            'no_warnings': True,
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
                 'preferredquality': '192'
-            }],
-            'outtmpl': f'{output_ytdlp}/{self.title}.%(ext)s',
-            'quiet': True,
-            'no_warnings': True
+            }]
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
