@@ -25,7 +25,7 @@ async def main():
 
     @bot.on(events.NewMessage(pattern='https://'))
     async def handler(event):
-        global progress_list
+        global progress_list, tqdm_is_run
 
         message = await event.respond('Mengekstrak Link...')
         yt_dlp[event.chat.username] = backend.downloadWithYtdlp(event.text)
@@ -47,10 +47,9 @@ async def main():
 
                 message = await event.respond(f'Proses selesai, mengirim file ke chat.', parse_mode='HTML')
 
+                tqdm_is_run = False
                 progress_list = []
                 async def callback_progress(send_bytes, total):
-                    global tqdm_is_run
-
                     if not tqdm_is_run:
                         call_tqdm(total)
                     progress = int((send_bytes/total) * 100)
@@ -60,9 +59,6 @@ async def main():
 
                         await message.edit(f'Mengirim File\n\n<code>{t}</code>', parse_mode='HTML')
                         progress_list.append(progress)
-
-                    if progress == 100:
-                        tqdm_is_run = False
                 
                 await conv.send_file(file, caption='Selesai!', progress_callback=callback_progress)
                 os.remove(file)
@@ -97,7 +93,7 @@ async def main():
 
     @bot.on(events.CallbackQuery)
     async def callback_query_handler(event):
-        global username, progress_list, t
+        global username, progress_list, t, tqdm_is_run
     
         username = event.chat.username
 
@@ -112,10 +108,9 @@ async def main():
 
         message = await event.respond('Proses selesai, mengirim file ke chat.', parse_mode='HTML')
 
+        tqdm_is_run = False
         progress_list = []
         async def callback_progress(send_bytes, total):
-            global tqdm_is_run
-            
             if not tqdm_is_run:
                 call_tqdm(total)
 
@@ -126,9 +121,6 @@ async def main():
                 
                 await message.edit(f'Mengirim File\n\n<code>{t}</code>', parse_mode='HTML')
                 progress_list.append(progress)
-
-            if progress == 100:
-                tqdm_is_run = False
         
         try:
             await bot.send_file(username, file, caption='Selesai!', progress_callback=callback_progress)
