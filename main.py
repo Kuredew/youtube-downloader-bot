@@ -21,7 +21,7 @@ yt_dlp = {}
 async def main():
     @bot.on(events.NewMessage(pattern='/start'))
     async def handler(event):
-        await event.respond('Selamat datang di bot <b>Youtube Working Downloader!</b>\nKirim link Untuk mulai mendownload\n\nTidak hanya youtube, bot ini mendukung semua link yang didukung oleh YT-DLP\nseperti Instagram, Facebook, dll', buttons=Button.url('Creator', 't.me/zeanetstd'))
+        await event.respond('Selamat datang di bot <b>Youtube Working Downloader!</b>\nKirim link Untuk mulai mendownload\n\nTidak hanya youtube, bot ini mendukung semua link yang didukung oleh YT-DLP\nseperti Instagram, Facebook, dll', buttons=Button.url('Creator', 't.me/zeanetstd'), parse_mode='HTML')
 
     @bot.on(events.NewMessage(pattern='https://'))
     async def handler(event):
