@@ -1,3 +1,4 @@
 Telethon==1.37.0
 yt_dlp==2025.1.26
 cryptg==0.5.0.post0
+tqdm==4.67.1
