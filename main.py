@@ -12,8 +12,10 @@ BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = TelegramClient('youtube-downloader', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
 def call_tqdm(total):
-    global t
+    global t, tqdm_is_run
+
     t = tqdm(total=total, unit_scale=True, bar_format='{percentage:3.0f}%|{bar}|\n\nKecepatan {rate_fmt}', ncols=40)
+    tqdm_is_run = True
 
 yt_dlp = {}
 async def main():
@@ -47,7 +49,10 @@ async def main():
 
                 progress_list = []
                 async def callback_progress(send_bytes, total):
-                    call_tqdm(total)
+                    global tqdm_is_run
+
+                    if not tqdm_is_run:
+                        call_tqdm(total)
                     progress = int((send_bytes/total) * 100)
 
                     if progress not in progress_list:
@@ -55,6 +60,9 @@ async def main():
 
                         await message.edit(f'Mengirim File\n\n<code>{t}</code>', parse_mode='HTML')
                         progress_list.append(progress)
+
+                    if progress == 100:
+                        tqdm_is_run = False
                 
                 await conv.send_file(file, caption='Selesai!', progress_callback=callback_progress)
                 os.remove(file)
@@ -106,7 +114,11 @@ async def main():
 
         progress_list = []
         async def callback_progress(send_bytes, total):
-            call_tqdm(total)
+            global tqdm_is_run
+            
+            if not tqdm_is_run:
+                call_tqdm(total)
+
             progress = int((send_bytes/total) * 100)
 
             if progress not in progress_list:
@@ -114,6 +126,9 @@ async def main():
                 
                 await message.edit(f'Mengirim File\n\n<code>{t}</code>', parse_mode='HTML')
                 progress_list.append(progress)
+
+            if progress == 100:
+                tqdm_is_run = False
         
         try:
             await bot.send_file(username, file, caption='Selesai!', progress_callback=callback_progress)
