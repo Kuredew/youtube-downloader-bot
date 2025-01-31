@@ -27,7 +27,7 @@ class downloadWithYtdlp:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 dataVideo = ydl.extract_info(self.url, download=False)
                 dataVideoSanitize = ydl.sanitize_info(dataVideo)
-                self.title = dataVideoSanitize['title'] + '-' + dataVideoSanitize['id']
+                self.title = dataVideoSanitize['title'].replace('/', '-')
                 type_file = 'audio' if dataVideoSanitize['resolution'] == 'audio only' else 'video'
                 self.extension = 'mp4' if type_file == 'video' else 'mp3'
 

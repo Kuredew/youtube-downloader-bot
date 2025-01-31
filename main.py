@@ -2,50 +2,58 @@ from telethon import events, TelegramClient
 from telethon.tl.custom import Button
 import backend
 import os
+from tqdm import tqdm
+from time import sleep
 
 API_ID = '29025157'
 API_HASH = '1b24dd470c853bf2d5f411b7fb215644'
 BOT_TOKEN = '7582144074:AAGln6na087oFIJzytqZrhEdqatv-wm3-rI'
 BOT_TOKEN_TEST = '7229088612:AAEaAJOoJ2Mo0SfivrQq6ZjVOR34CjsRfnM'
 
-bot = TelegramClient('youtube-downloader-test', API_ID, API_HASH).start(bot_token=BOT_TOKEN_TEST)
+bot = TelegramClient('youtube-downloader', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
 
 yt_dlp = {}
 async def main():
     @bot.on(events.NewMessage(pattern='/start'))
     async def handler(event):
-        await event.respond('Selamat datang di bot Youtube Working Downloader!\nKirim link Untuk mulai mendownload\n\nBot ini mendukung semua link yang didukung oleh YT-DLP', buttons=Button.url('Creator', 't.me/zeanetstd'))
+        await event.respond('Selamat datang di bot <b>Youtube Working Downloader!</b>\nKirim link Untuk mulai mendownload\n\nTidak hanya youtube, bot ini mendukung semua link yang didukung oleh YT-DLP\nseperti Instagram, Facebook, dll', buttons=Button.url('Creator', 't.me/zeanetstd'))
 
     @bot.on(events.NewMessage(pattern='https://'))
     async def handler(event):
-        await event.respond('Mengekstrak Link...')
+        global progress_list
+
+        message = await event.respond('Mengekstrak Link...')
         yt_dlp[event.chat.username] = backend.downloadWithYtdlp(event.text)
 
         list_formats = yt_dlp[event.chat.username].listFormats()
         if not list_formats:
-            await event.respond('Terjadi masalah saat mengekstrak link, silahkan coba lagi')
+            await message.edit('Ada masalah pada module YT-DLP, Silahkan coba lagi\n\nHarap lapor jika masalah berlanjut. \nBest Regards, @zeanetstd')
             return False
         
         if list_formats['type'] == 'audio':
             async with bot.conversation(event.chat.username) as conv:
-                global message
 
                 await conv.send_message('Audio Only/Music terdeteksi')
 
-                await conv.send_message('Mengekstrak dan mendownload file...')
+                await conv.send_message('Mengekstrak dan memproses file...')
                 yt_dlp[event.chat.username].downloadMusic()
 
                 file = yt_dlp[event.chat.username].File()
 
-                message = await event.respond(f'Proses selesai, mengirim file ke chat. (<code>{0}%</code>)', parse_mode='HTML')
+                message = await event.respond(f'Proses selesai, mengirim file ke chat.', parse_mode='HTML')
 
+                progress_list = []
                 async def callback_progress(send_bytes, total):
-                    global message
-
+                    t = tqdm(total=total, unit_scale=True, bar_format='{percentage:3.0f}%|{bar}|\n\nKecepatan {rate_fmt}', ncols=40)
                     progress = int((send_bytes/total) * 100)
-                    #await event.respond('0')
-                    await message.edit(f'Proses selesai, mengirim file ke chat. (<code>{progress}%</code>)', parse_mode='HTML')
+
+                    if progress not in progress_list:
+                        t.n = send_bytes
+                        
+                        await message.edit(f'Mengirim File\n\n<code>{t}</code>', parse_mode='HTML')
+                        progress_list.append(progress)
+                
                 await conv.send_file(file, caption='Selesai!', progress_callback=callback_progress)
                 os.remove(file)
         else:
@@ -79,7 +87,7 @@ async def main():
 
     @bot.on(events.CallbackQuery)
     async def callback_query_handler(event):
-        global message_id, username
+        global username, progress_list, t
     
         username = event.chat.username
 
@@ -92,22 +100,25 @@ async def main():
 
         file = yt_dlp[event.chat.username].File()
 
-        message = await event.respond('Proses selesai, mengirim file ke chat. (<code>0%</code>)', parse_mode='HTML')
-        message_id = message.id
+        message = await event.respond('Proses selesai, mengirim file ke chat.', parse_mode='HTML')
+            
 
+        progress_list = []
         async def callback_progress(send_bytes, total):
+            t = tqdm(total=total, unit_scale=True, bar_format='{percentage:3.0f}%|{bar}|\n\nKecepatan {rate_fmt}', ncols=40)
             progress = int((send_bytes/total) * 100)
-            #await event.respond('0')
-            print(f'Mengirim File : {progress}')
-            #await bot.edit_message(username, message_id, f'Proses selesai, mengirim file ke chat. (<code>{progress}%</code>)', parse_mode='HTML')
+
+            if progress not in progress_list:
+                t.n = send_bytes
+                
+                await message.edit(f'Mengirim File\n\n<code>{t}</code>', parse_mode='HTML')
+                progress_list.append(progress)
         
         try:
             await bot.send_file(username, file, caption='Selesai!', progress_callback=callback_progress)
         except:
             await bot.send_file(username, file, caption='Selesai!', progress_callback=callback_progress, force_document=True)
         os.remove(file)
-
-        message_id = None
 
 
     @bot.on(events.NewMessage(pattern='/tes-kirim'))
@@ -129,6 +140,19 @@ async def main():
         print('[Selesai]')
         edit = False
     
+    @bot.on(events.NewMessage(pattern='/bar'))
+    async def handler(event):
+        t = tqdm(total=100, unit_scale=True, bar_format='{percentage:3.0f}%|{bar}|\n\nKecepatan {rate_fmt}', ncols=40)
+
+        message = await event.respond(f'Memulai Bar.', parse_mode='HTML')
+        angka = 0
+        while angka <= 100:
+            t.n = angka
+
+            await message.edit(f'Tes Bar\n\n<code>{t}</code>', parse_mode='HTML')
+            angka += 1
+            sleep(0.5)
+
     print('Bot Running...')
     await bot.run_until_disconnected()
 
