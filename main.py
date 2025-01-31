@@ -8,7 +8,7 @@ API_HASH = '1b24dd470c853bf2d5f411b7fb215644'
 BOT_TOKEN = '7582144074:AAGln6na087oFIJzytqZrhEdqatv-wm3-rI'
 BOT_TOKEN_TEST = '7229088612:AAEaAJOoJ2Mo0SfivrQq6ZjVOR34CjsRfnM'
 
-bot = TelegramClient('youtube-downloader', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
+bot = TelegramClient('youtube-downloader-test', API_ID, API_HASH).start(bot_token=BOT_TOKEN_TEST)
 
 
 yt_dlp = {}
@@ -98,18 +98,16 @@ async def main():
         async def callback_progress(send_bytes, total):
             progress = int((send_bytes/total) * 100)
             #await event.respond('0')
-            await bot.edit_message(username, message_id, f'Proses selesai, mengirim file ke chat. (<code>{progress}%</code>)', parse_mode='HTML')
+            print(f'Mengirim File : {progress}')
+            #await bot.edit_message(username, message_id, f'Proses selesai, mengirim file ke chat. (<code>{progress}%</code>)', parse_mode='HTML')
         
         try:
-            try:
-                await bot.send_file(username, file, caption='Selesai!', progress_callback=callback_progress)
-            except:
-                await bot.send_file(username, file, caption='Selesai!', progress_callback=callback_progress, force_document=True)
-            os.remove(file)
+            await bot.send_file(username, file, caption='Selesai!', progress_callback=callback_progress)
+        except:
+            await bot.send_file(username, file, caption='Selesai!', progress_callback=callback_progress, force_document=True)
+        os.remove(file)
 
-            message_id = None
-        except Exception as e:
-            await event.respond(f'Gagal mengirim file, kesalahan : {e}')
+        message_id = None
 
 
     @bot.on(events.NewMessage(pattern='/tes-kirim'))
