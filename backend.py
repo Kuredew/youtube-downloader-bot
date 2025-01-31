@@ -5,7 +5,7 @@ import subprocess
 
 output_ytdlp = 'output-ytdlp'
 output_video_info = 'output-video-info'
-cookie = 'cookies.txt'
+cookie = os.environ.get('COOKIE')
 
 class downloadWithYtdlp:
     if not os.path.exists(output_video_info):

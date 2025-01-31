@@ -5,13 +5,15 @@ import os
 from tqdm import tqdm
 from time import sleep
 
-API_ID = '29025157'
-API_HASH = '1b24dd470c853bf2d5f411b7fb215644'
-BOT_TOKEN = '7582144074:AAGln6na087oFIJzytqZrhEdqatv-wm3-rI'
-BOT_TOKEN_TEST = '7229088612:AAEaAJOoJ2Mo0SfivrQq6ZjVOR34CjsRfnM'
+API_ID = os.environ.get('API_ID')
+API_HASH = os.environ.get('API_HASH')
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
 bot = TelegramClient('youtube-downloader', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
+def call_tqdm(total):
+    global t
+    t = tqdm(total=total, unit_scale=True, bar_format='{percentage:3.0f}%|{bar}|\n\nKecepatan {rate_fmt}', ncols=40)
 
 yt_dlp = {}
 async def main():
@@ -45,12 +47,12 @@ async def main():
 
                 progress_list = []
                 async def callback_progress(send_bytes, total):
-                    t = tqdm(total=total, unit_scale=True, bar_format='{percentage:3.0f}%|{bar}|\n\nKecepatan {rate_fmt}', ncols=40)
+                    call_tqdm(total)
                     progress = int((send_bytes/total) * 100)
 
                     if progress not in progress_list:
                         t.n = send_bytes
-                        
+
                         await message.edit(f'Mengirim File\n\n<code>{t}</code>', parse_mode='HTML')
                         progress_list.append(progress)
                 
@@ -101,11 +103,10 @@ async def main():
         file = yt_dlp[event.chat.username].File()
 
         message = await event.respond('Proses selesai, mengirim file ke chat.', parse_mode='HTML')
-            
 
         progress_list = []
         async def callback_progress(send_bytes, total):
-            t = tqdm(total=total, unit_scale=True, bar_format='{percentage:3.0f}%|{bar}|\n\nKecepatan {rate_fmt}', ncols=40)
+            call_tqdm(total)
             progress = int((send_bytes/total) * 100)
 
             if progress not in progress_list:
