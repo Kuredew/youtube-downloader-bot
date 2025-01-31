@@ -14,7 +14,7 @@ bytes_cookie_env = cookie_env.encode('ascii')
 decoded_bytes_cookie_env = base64.b64decode(bytes_cookie_env)
 
 string_decoded_bytes_cookie_env = decoded_bytes_cookie_env.decode('ascii')
-with open('cookie_youtube.txt') as file:
+with open('cookie_youtube.txt', 'w') as file:
     file.write(string_decoded_bytes_cookie_env)
 
 cookie = 'cookie_youtube.txt'
