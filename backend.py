@@ -2,10 +2,22 @@ import yt_dlp
 import json
 import os
 import subprocess
+import base64
 
 output_ytdlp = 'output-ytdlp'
 output_video_info = 'output-video-info'
-cookie = os.environ.get('COOKIE')
+
+# Import Cookie From Environment Variable
+cookie_env = os.environ.get('COOKIE')
+
+bytes_cookie_env = cookie_env.encode('ascii')
+decoded_bytes_cookie_env = base64.b64decode(bytes_cookie_env)
+
+string_decoded_bytes_cookie_env = decoded_bytes_cookie_env.decode('ascii')
+with open('cookie_youtube.txt') as file:
+    file.write(string_decoded_bytes_cookie_env)
+
+cookie = 'cookie_youtube.txt'
 
 class downloadWithYtdlp:
     if not os.path.exists(output_video_info):
